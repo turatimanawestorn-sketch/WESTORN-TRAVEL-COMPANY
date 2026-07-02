@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WESTORN TRAVEL COMPANY</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#eef3f8;
+}
+
+/* HEADER */
+header{
+background:#002147;
+color:white;
+text-align:center;
+padding:15px;
+}
+
+/* PAGE SYSTEM */
+.page{display:none;}
+.active{display:block;}
+
+/* HERO */
+.hero{
+height:25vh;
+background:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),
+url("https://picsum.photos/1200/600") center/cover;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+font-size:22px;
+font-weight:bold;
+}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:10px;
+padding:15px;
+}
+
+/* CARD */
+.card{
+background:white;
+border-radius:10px;
+overflow:hidden;
+cursor:pointer;
+position:relative;
+}
+.card img{
+width:100%;
+height:110px;
+object-fit:cover;
+}
+.card h3{
+margin:0;
+padding:8px;
+text-align:center;
+font-size:14px;
+}
+
+/* FAVORITE */
+.fav{
+position:absolute;
+top:5px;
+right:8px;
+font-size:18px;
+cursor:pointer;
+}
+
+/* BUTTON */
+button{
+padding:10px;
+margin:10px;
+background:#002147;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* VIEWER */
+.viewer{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.9);
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+.viewer img{
+max-width:90%;
+max-height:80%;
+border-radius:10px;
+}
+
+input{
+width:90%;
+max-width:400px;
+padding:10px;
+margin:10px auto;
+display:block;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🌍 WESTORN TRAVEL COMPANY</h1>
+</header>
+
+<!-- HOME -->
+<div id="home" class="page active">
+
+<div class="hero">Explore the World</div>
+
+<input id="search" placeholder="Search country..." onkeyup="renderCountries()">
+
+<div class="grid" id="grid"></div>
+
+</div>
+
+<!-- GALLERY -->
+<div id="galleryPage" class="page">
+
+<button onclick="goHome()">⬅ Back</button>
+
+<h2 id="title" style="padding-left:15px"></h2>
+
+<div class="grid" id="gallery"></div>
+
+</div>
+
+<!-- VIEWER -->
+<div class="viewer" id="viewer" onclick="closeViewer()">
+<img id="viewerImg">
+</div>
+
+<script>
+
+const countries = [
+"Rwanda","USA","China","UK","France","Germany","Italy","Japan","Canada","Brazil",
+"India","Australia","Kenya","Egypt","Spain","Turkey","South Africa","Mexico","Russia","Singapore",
+"Nigeria","Ethiopia","Morocco","Thailand","Indonesia","Malaysia","Vietnam","Saudi Arabia","UAE","Portugal",
+"Greece","Netherlands","Switzerland","Sweden","Norway","Finland","Poland","Ukraine","Belgium","Argentina",
+"Chile","Peru","Colombia","Pakistan","Bangladesh","Philippines","New Zealand","Cuba","Iran","Iraq"
+];
+
+const grid = document.getElementById("grid");
+
+let favorites = JSON.parse(localStorage.getItem("fav")) || [];
+
+function saveFav(){
+localStorage.setItem("fav",JSON.stringify(favorites));
+}
+
+// ================= HOME =================
+function renderCountries(){
+
+let search = document.getElementById("search").value?.toLowerCase() || "";
+
+grid.innerHTML="";
+
+countries
+.filter(c => c.toLowerCase().includes(search))
+.forEach(c=>{
+
+let card=document.createElement("div");
+card.className="card";
+
+let isFav = favorites.includes(c);
+
+card.innerHTML=`
+<div class="fav" onclick="toggleFav(event,'${c}')">
+${isFav ? "❤️" : "🤍"}
+</div>
+<img src="https://picsum.photos/400/300?random=${c}">
+<h3>${c}</h3>
+`;
+
+card.onclick=()=>openCountry(c);
+
+grid.appendChild(card);
+});
+
+}
+
+function toggleFav(e,c){
+e.stopPropagation();
+
+if(favorites.includes(c)){
+favorites = favorites.filter(x=>x!==c);
+}else{
+favorites.push(c);
+}
+
+saveFav();
+renderCountries();
+}
+
+// ================= OPEN COUNTRY =================
+function openCountry(country){
+
+document.getElementById("home").classList.remove("active");
+document.getElementById("galleryPage").classList.add("active");
+
+document.getElementById("title").innerText="📍 "+country;
+
+const gallery=document.getElementById("gallery");
+gallery.innerHTML="";
+
+for(let i=0;i<60;i++){
+
+let img=document.createElement("img");
+let src=`https://picsum.photos/700/500?random=${country+i}`;
+
+img.src=src;
+img.style.width="100%";
+img.style.height="120px";
+img.style.objectFit="cover";
+img.style.borderRadius="8px";
+
+img.onclick=()=>openViewer(src);
+
+gallery.appendChild(img);
+}
+
+}
+
+// ================= BACK =================
+function goHome(){
+document.getElementById("galleryPage").classList.remove("active");
+document.getElementById("home").classList.add("active");
+}
+
+// ================= VIEWER =================
+function openViewer(src){
+document.getElementById("viewer").style.display="flex";
+document.getElementById("viewerImg").src=src;
+}
+
+function closeViewer(){
+document.getElementById("viewer").style.display="none";
+}
+
+// INIT
+renderCountries();
+
+</script>
+
+</body>
+</html>
